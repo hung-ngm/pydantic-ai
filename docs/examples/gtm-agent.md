@@ -42,6 +42,19 @@ curl -X POST http://localhost:8000/plans \
 
 The response holds the strategy, the report path, and any content tasks. Fetch the research report with `GET /threads/{thread_id}/report`.
 
+## Traces
+
+The service sends agent, HTTP, and model-request spans to Logfire when it has a token. Without a token it sends nothing and runs as normal. Each plan run has one `Run GTM plan` span and one completion log with the grounding-violation count.
+
+Sign in and connect this directory to a project:
+
+```bash
+uvx logfire-cli auth
+uvx logfire-cli init
+```
+
+Or set `LOGFIRE_TOKEN` in `.env`. Set `GTM_ENVIRONMENT` to tag spans with an environment other than `dev`. View traces in Logfire under the `gtm-agent` service.
+
 ## The code
 
 The example lives in `examples/pydantic_ai_examples/gtm_agent/`.

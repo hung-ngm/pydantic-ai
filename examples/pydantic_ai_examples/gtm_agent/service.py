@@ -5,10 +5,11 @@ strategy. The legacy LangGraph SDK shape (POST /threads and
 POST /threads/{thread_id}/runs) is a thin adapter over the same run.
 The adapter is temporary: delete it once callers move to /plans.
 
-Observability: Logfire is configured only when LOGFIRE_TOKEN is set
-or a .logfire/ directory exists. Otherwise runs proceed without
-instrumentation and the service logs one warning at startup. Tests
-and CI have no token, so instrumentation must never block a run.
+Observability: Logfire configures once per process at startup
+(`configure_observability`), with `send_to_logfire='if-token-present'`,
+so runs without a token send nothing and proceed as normal. Each plan
+run gets one span and one completion log. Tests and CI have no token,
+so instrumentation must never block a run.
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from pydantic import BaseModel, Field
 
 from pydantic_ai.exceptions import UserError
 
+from . import __version__
 from .agents import build_production_agents
 from .models import (
     REPORT_PUBLIC_PATH,
@@ -39,19 +41,38 @@ from .tasks import TaskQueue
 logger = logging.getLogger(__name__)
 
 
-def configure_observability() -> bool:
-    """Configure Logfire when credentials exist. Returns True if on."""
-    if os.environ.get('LOGFIRE_TOKEN') or Path('.logfire').exists():
-        import logfire
+_observability_configured: bool | None = None
 
-        logfire.configure()
-        logfire.instrument_pydantic_ai()
-        return True
-    logger.warning(
-        'Logfire is not configured: set LOGFIRE_TOKEN or run '
-        '`uvx logfire auth` to record runs.'
+
+def configure_observability() -> bool:
+    """Configure Logfire once per process. Returns True if it sends.
+
+    Always configures: with no token it sends nothing
+    (`send_to_logfire='if-token-present'`) and logs one warning.
+    Later calls return the first result without reconfiguring.
+    """
+    global _observability_configured
+    if _observability_configured is not None:
+        return _observability_configured
+    import logfire
+
+    logfire.configure(
+        send_to_logfire='if-token-present',
+        service_name='gtm-agent',
+        service_version=__version__,
+        environment=os.environ.get('GTM_ENVIRONMENT', 'dev'),
     )
-    return False
+    logfire.instrument_pydantic_ai()
+    logfire.instrument_httpx(capture_all=True)
+    _observability_configured = bool(
+        os.environ.get('LOGFIRE_TOKEN') or Path('.logfire').exists()
+    )
+    if not _observability_configured:
+        logger.warning(
+            'Logfire is not configured: set LOGFIRE_TOKEN or run '
+            '`uvx logfire-cli auth` and `uvx logfire-cli init` to record runs.'
+        )
+    return _observability_configured
 
 
 ### [requests]
@@ -97,32 +118,41 @@ async def _run_plan(
     researcher_model: str | object | None = None,
 ) -> PlanResponse:
     """Run one plan in a thread workspace, returning the response."""
-    orchestrator, researcher = build_production_agents(
-        workspace,
-        task_queue=queue,
-        orchestrator_model=orchestrator_model,
-        researcher_model=researcher_model,
-        step_store=store,
-    )
-    history = None
-    runs = await store.list_runs(conversation_id=thread_id)
-    if runs:
-        history = await resume_history(store, runs[-1].run_id)
-    async with orchestrator, researcher:
-        result = await orchestrator.run(
-            prompt,
-            deps=GtmDeps(user_id=user_id),
-            conversation_id=thread_id,
-            message_history=history,
+    import logfire
+
+    with logfire.span('Run GTM plan {thread_id}', thread_id=thread_id):
+        orchestrator, researcher = build_production_agents(
+            workspace,
+            task_queue=queue,
+            orchestrator_model=orchestrator_model,
+            researcher_model=researcher_model,
+            step_store=store,
         )
-    report = workspace / REPORT_WORKSPACE_PATH
-    return PlanResponse(
-        thread_id=thread_id,
-        strategy=result.output,
-        grounding_violations=grounding_violations(result.output),
-        report_path=REPORT_PUBLIC_PATH if report.is_file() else None,
-        content_tasks=queue.list_tasks(),
-    )
+        history = None
+        runs = await store.list_runs(conversation_id=thread_id)
+        if runs:
+            history = await resume_history(store, runs[-1].run_id)
+        async with orchestrator, researcher:
+            result = await orchestrator.run(
+                prompt,
+                deps=GtmDeps(user_id=user_id),
+                conversation_id=thread_id,
+                message_history=history,
+            )
+        violations = grounding_violations(result.output)
+        logfire.info(
+            'Plan complete {thread_id}',
+            thread_id=thread_id,
+            grounding_violations=len(violations),
+        )
+        report = workspace / REPORT_WORKSPACE_PATH
+        return PlanResponse(
+            thread_id=thread_id,
+            strategy=result.output,
+            grounding_violations=violations,
+            report_path=REPORT_PUBLIC_PATH if report.is_file() else None,
+            content_tasks=queue.list_tasks(),
+        )
 
 
 ### [legacy]
@@ -185,6 +215,14 @@ def create_app(
     store = step_store or sqlite_store(root / 'runs.db')
     queues: dict[str, TaskQueue] = {}
     app = FastAPI(title='gtm-agent')
+
+    # Configure before instrumenting: instrument_fastapi() only sends
+    # spans once configure() has run. configure_observability() is
+    # idempotent, so repeated create_app() calls are safe.
+    configure_observability()
+    import logfire
+
+    logfire.instrument_fastapi(app)
 
     def thread_workspace(thread_id: str) -> Path:
         path = root / 'threads' / thread_id
