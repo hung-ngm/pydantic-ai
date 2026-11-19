@@ -109,7 +109,7 @@ The legacy LangGraph SDK shape (`POST /threads` and `POST /threads/{thread_id}/r
 ## Notes
 
 !!! note "Model ids"
-    The supervisor runs `openai:gpt-5.4-nano` and the researcher and content-writer run `openai:gpt-5.4-mini` — the exact ids from the source example. One third-party source claims `gpt-5.4-nano` was deprecated 2026-10-01 with shutdown 2027-04-01 and replacement `gpt-6-luna`. That claim is not verified against OpenAI, so the source ids stay.
+    The supervisor runs `openai:gpt-5.4-nano` and the researcher and content-writer run `openai:gpt-5.4-mini` — the exact ids from the source example. One third-party source claims `gpt-5.4-nano` was deprecated 2026-10-01 with shutdown 2027-04-01 and replacement `gpt-6-luna`. A live check on 19 Nov 2026 found `gpt-5.4-nano` listed in `/v1/models` and running as the supervisor, so it is available now and the source ids stay; the 2027 shutdown date is still unverified.
 
 The example's tests live in `gtm_agent/tests/` and run with scripted models, so they need no API key. The repo suite does not collect example-package tests (the Slack lead qualifier example has no test file either; its code is exercised through docs fences), so run them directly:
 
