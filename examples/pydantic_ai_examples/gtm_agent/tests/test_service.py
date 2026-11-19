@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import httpx
+import pytest
 from httpx import ASGITransport
 
 from pydantic_ai_examples.gtm_agent.models import REPORT_PUBLIC_PATH
@@ -17,6 +18,11 @@ from .test_parity import (
     PROMPTS,
     scripted_orchestrator_model,
     scripted_researcher_model,
+)
+
+# Scripted models have no price, so SpendLimits warns; expected in tests.
+pytestmark = pytest.mark.filterwarnings(
+    'ignore::pydantic_ai_harness.spend_limits.UnpricedModelWarning'
 )
 
 

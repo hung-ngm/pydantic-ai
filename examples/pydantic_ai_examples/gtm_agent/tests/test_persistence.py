@@ -22,6 +22,11 @@ from .test_parity import (
     scripted_researcher_model,
 )
 
+# Scripted models have no price, so SpendLimits warns; expected in tests.
+pytestmark = pytest.mark.filterwarnings(
+    'ignore::pydantic_ai_harness.spend_limits.UnpricedModelWarning'
+)
+
 
 async def test_sqlite_persistence_records_and_resumes(tmp_path: Path) -> None:
     store = sqlite_store(tmp_path / 'runs.db')
