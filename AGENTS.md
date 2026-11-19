@@ -175,3 +175,17 @@ Additionally, always read the directory-specific instructions when working in th
 - [src/pydantic_ai_harness/AGENTS.md](src/pydantic_ai_harness/AGENTS.md)
 - [tests/AGENTS.md](tests/AGENTS.md)
 - [tests/harness/AGENTS.md](tests/harness/AGENTS.md)
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub issues in this repo, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default triage vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: one `GLOSSARY.md` at the repo root and ADRs under `docs/adr/`. See `docs/agents/domain.md`.

@@ -119,6 +119,8 @@ local-notes/
 
 # gtm-agent: Matt Pocock skills (31) + Cursor pstack skills (58)
 # Copied in full on the gtm-agent branch; see .agents/skills/README.md.
+# Agent-skills adaptation of the pstack model rule (see .agents/pstack-models.md).
+!.agents/pstack-models.md
 # Unlike the repo's own skills above (SKILL.md only), these skills ship
 # references/, playbooks/ and scripts/ as part of the skill, so each
 # directory is unignored in full.
