@@ -17,18 +17,8 @@ symlinks in `.claude/skills/` (following the repo's existing pattern:
   with `gh skill install github/gh-stack` (v0.3.0). Manages stacked
   PRs with the `gh stack` CLI extension — see `docs/agents/`
   for the stacked-PR workflow used on this branch.
-- **Pydantic — official skills** (`pydantic/skills`): 21 skills from the
-  top-level `skills/` directory (cross-agent, agentskills.io standard),
-  at commit 98f591c. `building-pydantic-ai-agents` and
-  `pydantic-ai-harness` for building agents with Pydantic AI, `pydantic`
-  for validation, 9 `migrating-*-to-pydantic-ai` skills (LangChain,
-  OpenAI Agents SDK, Claude Agent SDK, Google ADK, Mastra, Agno, Pi,
-  Vercel AI SDK, Deep Agents), and 8 Logfire skills (setup,
-  instrumentation, query, evals, UI, frontend, gateway,
-  coding-agents). The `plugins/` copies in that repo were NOT copied —
-  they duplicate these skills plus host-specific commands/hooks.
 
-Total: 111 skills (31 + 58 + 1 + 21).
+Total: 90 skills (31 + 58 + 1).
 
 ## Name collisions
 
@@ -45,9 +35,6 @@ and their `SKILL.md` frontmatter `name:` was updated to match.
   triage labels, domain docs layout.
 - `/gh-stack` — stacked PRs: create a stack before writing files, one
   dependent concern per layer, submit with `gh stack submit --auto`.
-- `/building-pydantic-ai-agents` — the main skill for building agents
-  with Pydantic AI in this repo; `/pydantic` for Pydantic validation;
-  `/logfire-instrumentation` and `/logfire-query` for observability.
 - Everything else is situational: `/tdd`, `/teach`, `/implement`,
   `/code-review`, `/triage`, `/pr`, etc.
 
