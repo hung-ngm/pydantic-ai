@@ -221,9 +221,6 @@ local-notes/
 !.agents/skills/matt-tdd/
 !.agents/skills/matt-tdd/**
 !.claude/skills/matt-tdd
-!.agents/skills/gh-stack/
-!.agents/skills/gh-stack/**
-!.claude/skills/gh-stack
 !.agents/skills/matt-teach/
 !.agents/skills/matt-teach/**
 !.claude/skills/matt-teach

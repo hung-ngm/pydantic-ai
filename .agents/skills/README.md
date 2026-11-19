@@ -13,12 +13,8 @@ symlinks in `.claude/skills/` (following the repo's existing pattern:
 - **Cursor pstack** (`cursor/plugins`, `pstack/`): all 58 skills from
   `pstack/skills`, including `poteto-mode` and the 22 `principle-*`
   skills. Version 0.15.44 at install time.
-- **GitHub gh-stack** (`github/gh-stack`): 1 skill, `gh-stack`, installed
-  with `gh skill install github/gh-stack` (v0.3.0). Manages stacked
-  PRs with the `gh stack` CLI extension — see `docs/agents/`
-  for the stacked-PR workflow used on this branch.
 
-Total: 90 skills (31 + 58 + 1).
+Total: 89 skills (31 + 58).
 
 ## Name collisions
 
@@ -33,8 +29,6 @@ and their `SKILL.md` frontmatter `name:` was updated to match.
 - `/setup-pstack` — pick pstack models / reasoning budget.
 - `/setup-matt-pocock-skills` — run once per repo: issue tracker,
   triage labels, domain docs layout.
-- `/gh-stack` — stacked PRs: create a stack before writing files, one
-  dependent concern per layer, submit with `gh stack submit --auto`.
 - Everything else is situational: `/tdd`, `/teach`, `/implement`,
   `/code-review`, `/triage`, `/pr`, etc.
 
