@@ -48,6 +48,7 @@ requires-python = ">=3.11"
 [tool.hatch.metadata.hooks.uv-dynamic-versioning]
 dependencies = [
     "pydantic-ai-slim[openai,google,groq,anthropic,ag-ui,realtime]=={{ version }}",
+    "pydantic-ai-harness=={{ version }}",
     "pydantic-evals=={{ version }}",
     "asyncpg>=0.31.0",
     "fastapi>=0.117.0",
@@ -85,6 +86,7 @@ packages = ["pydantic_ai_examples"]
 
 [tool.uv.sources]
 pydantic-ai-slim = { workspace = true }
+pydantic-ai-harness = { workspace = true }
 
 [tool.ruff]
 extend = "../pyproject.toml"
