@@ -458,3 +458,6 @@ local-notes/
 !.agents/skills/writing-for-agents/
 !.agents/skills/writing-for-agents/**
 !.claude/skills/writing-for-agents
+
+# Study references only — never committed.
+refs/
